@@ -17,8 +17,8 @@ module.exports = {
         }
     ],
 
-    callback: (client, interaction) => {
-        const colorCode = interaction.options.getString('color-code');
+    callback: async (client, interaction) => {
+        const colorCode = interaction.options.getString('color-code').toLowerCase();
 
         if (!hexColorRegex.test(colorCode))
         {
@@ -32,6 +32,71 @@ module.exports = {
                     ephemeral: true
                 }                
             );
+        }
+
+        let role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === colorCode);
+        let existingColorRole = interaction.member.roles.cache.find(r => r.name.startsWith('#'));
+
+        if(!role)
+        {
+            try
+            {
+                role = await interaction.guild.roles.create({
+                    name: colorCode,
+                    color: colorCode,
+                    reason: `Created role for color ${colorCode}` 
+                });
+
+                interaction.member.roles.add(role);
+                interaction.reply({
+                    content: `Created and assigned role ${colorCode}.`,
+                    ephemeral: true
+                });
+
+                handleExistingColor(interaction, existingColorRole);
+            }
+            catch (error)
+            {
+                console.log(error)
+            }
+        }
+        else
+        {
+            interaction.member.roles.add(role);
+            interaction.reply({
+                content: `Assigned role ${colorCode}.`,
+                ephemeral: true
+            });
+
+            handleExistingColor(interaction, existingColorRole);
+        }
+    }
+
+
+};
+
+async function handleExistingColor(interaction, existingColorRole) {
+    if (existingColorRole)
+    {
+        try 
+        {
+            interaction.member.roles.remove(existingColorRole, 'Replaced with new color').then(
+                async () => {
+                    const roles = interaction.guild.roles;
+                    await interaction.guild.roles.fetch({ roles, force: true});
+                    existingColorRole = interaction.guild.roles.cache.get(existingColorRole.id);
+
+                    if(existingColorRole.members.size === 0)
+                        {
+                            await existingColorRole.delete('Role is empty now');
+                            console.log('Deleting Role');
+                        }
+                }
+            )
+        }
+        catch (error)
+        {
+            console.log(error);
         }
     }
 }
