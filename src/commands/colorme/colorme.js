@@ -1,7 +1,5 @@
-const { ApplicationCommandOptionType, EmbedBuilder } = require('discord.js');
+const { ApplicationCommandOptionType } = require('discord.js');
 const sendMsg = require('../../utils/sendMsg');
-
-
 
 // Regular expression for hex color code validation
 const hexColorRegex = /^#([0-9A-F]{6})$/i;
@@ -32,6 +30,9 @@ module.exports = {
         let role = interaction.guild.roles.cache.find(role => role.name.toUpperCase() === colorCode);
         let existingColorRole = interaction.member.roles.cache.find(r => r.name.startsWith('#'));
 
+        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase() == 'COLORME');
+        let position = colorMeRole ? colorMeRole.position : interaction.guild.roles.size;
+
         if(!role)
         {
             try
@@ -39,6 +40,7 @@ module.exports = {
                 role = await interaction.guild.roles.create({
                     name: colorCode,
                     color: colorCode,
+                    position: position,
                     reason: `Created role for color ${colorCode}` 
                 });
 
