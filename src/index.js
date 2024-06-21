@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { Client, IntentsBitField } = require('discord.js');
+const eventHandler = require('./handlers/eventHandler');
 
 const client = new Client({
     intents: [
@@ -10,6 +11,4 @@ const client = new Client({
 
 client.login(process.env.DISCORD_TOKEN);
 
-client.on('ready', (c) => {
-    console.log(`✅ ${c.user.username} is online!`);
-})
+eventHandler(client);
