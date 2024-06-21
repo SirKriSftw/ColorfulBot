@@ -80,19 +80,13 @@ async function handleExistingColor(interaction, existingColorRole) {
     {
         try 
         {
-            interaction.member.roles.remove(existingColorRole, 'Replaced with new color').then(
-                async () => {
-                    const roles = interaction.guild.roles;
-                    await interaction.guild.roles.fetch({ roles, force: true});
-                    existingColorRole = interaction.guild.roles.cache.get(existingColorRole.id);
-
-                    if(existingColorRole.members.size === 0)
-                        {
-                            await existingColorRole.delete('Role is empty now');
-                            console.log('Deleting Role');
-                        }
-                }
-            )
+            const membersCount = existingColorRole.members.size
+            await interaction.member.roles.remove(existingColorRole, 'Replaced with new color');
+            if (membersCount - 1 <= 0)
+            {
+                await existingColorRole.delete('Role is empty now');
+                console.log('Deleting Role');
+            }
         }
         catch (error)
         {
