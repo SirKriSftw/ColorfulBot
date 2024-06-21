@@ -1,9 +1,10 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require('discord.js');
+const sendMsg = require('../../utils/sendMsg');
 
 
 
 // Regular expression for hex color code validation
-const hexColorRegex = /^#([0-9A-F]{3}){1,2}$/i;
+const hexColorRegex = /^#([0-9A-F]{6})$/i;
 
 module.exports = {
     name: 'colorme',
@@ -18,23 +19,17 @@ module.exports = {
     ],
 
     callback: async (client, interaction) => {
-        const colorCode = interaction.options.getString('color-code').toLowerCase();
+        const colorCode = interaction.options.getString('color-code').toUpperCase();
 
         if (!hexColorRegex.test(colorCode))
         {
-            const embed = new EmbedBuilder()
-                .setColor('#FF0000')
-                .setDescription('Error: Invalid hex color code format. Please use #RRGGBB');
-
-            return interaction.reply(
-                {
-                    embeds: [embed],
-                    ephemeral: true
-                }                
-            );
+            return sendMsg(
+                interaction, 
+                'Error: Please use #RRGGBB hex format',
+                '#FF0000');
         }
 
-        let role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === colorCode);
+        let role = interaction.guild.roles.cache.find(role => role.name.toUpperCase() === colorCode);
         let existingColorRole = interaction.member.roles.cache.find(r => r.name.startsWith('#'));
 
         if(!role)
@@ -48,10 +43,12 @@ module.exports = {
                 });
 
                 interaction.member.roles.add(role);
-                interaction.reply({
-                    content: `Created and assigned role ${colorCode}.`,
-                    ephemeral: true
-                });
+
+                const msg = `Created and assigned role ${colorCode}.`
+                sendMsg(
+                    interaction, 
+                    msg, 
+                    '#00FF00');
 
                 handleExistingColor(interaction, existingColorRole);
             }
@@ -63,16 +60,16 @@ module.exports = {
         else
         {
             interaction.member.roles.add(role);
-            interaction.reply({
-                content: `Assigned role ${colorCode}.`,
-                ephemeral: true
-            });
+
+            const msg = `Assigned role ${colorCode}.`
+                sendMsg(
+                    interaction, 
+                    msg, 
+                    '#00FF00');
 
             handleExistingColor(interaction, existingColorRole);
         }
     }
-
-
 };
 
 async function handleExistingColor(interaction, existingColorRole) {
@@ -85,7 +82,7 @@ async function handleExistingColor(interaction, existingColorRole) {
             if (membersCount - 1 <= 0)
             {
                 await existingColorRole.delete('Role is empty now');
-                console.log('Deleting Role');
+                console.log(`Deleting Role ${existingColorRole.name}`);
             }
         }
         catch (error)
