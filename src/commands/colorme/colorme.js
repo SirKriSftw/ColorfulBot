@@ -30,7 +30,7 @@ module.exports = {
         let role = interaction.guild.roles.cache.find(role => role.name.toUpperCase() === colorCode);
         let existingColorRole = interaction.member.roles.cache.find(r => r.name.startsWith('#'));
 
-        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase() == 'COLORME');
+        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
         let position = colorMeRole ? colorMeRole.position : interaction.guild.roles.size;
 
         if(!role)
