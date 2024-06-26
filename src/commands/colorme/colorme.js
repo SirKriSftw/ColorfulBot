@@ -1,5 +1,6 @@
 const { ApplicationCommandOptionType } = require('discord.js');
 const sendMsg = require('../../utils/sendMsg');
+const getColorList = require('../../utils/getColorList');
 
 // Regular expression for hex color code validation
 const hexColorRegex = /^#([0-9A-F]{6})$/i;
@@ -17,7 +18,7 @@ module.exports = {
     ],
     deleted: false,
     callback: async (client, interaction) => {
-        let colorList = getColorList(interaction);
+        let colorList = await getColorList(client, interaction);
         const colorCode = interaction.options.getString('color-code').toUpperCase();
 
         if(isUsingHexable(interaction))
@@ -37,8 +38,7 @@ function colorMeName(interaction, colorCode, colorList)
     if(!colorCode.includes('#'))
     {
         if(!colorList.includes(colorCode.toLowerCase()))
-        {
-            
+        {            
             return sendMsg(
                 interaction, 
                 `Error: Please use one of the following: ${colorListToString}`,
@@ -64,7 +64,22 @@ function colorMeName(interaction, colorCode, colorList)
 
 function colorMeHex(interaction, colorCode, colorList)
 {    
-    if(!hexColorRegex.test(colorCode))
+    if(!colorCode.includes('#'))
+    {
+        const colorListToString = colorList.join(', ');
+        if(colorList.includes(colorCode.toLowerCase()))
+        {
+            setColor(interaction, colorCode, colorList);
+        }
+        else
+        {
+            return sendMsg(
+                interaction, 
+                `Error: Please use one of the following: ${colorListToString} OR #RRGGBB format`,
+                '#FF0000');
+        }
+    }
+    else if(!hexColorRegex.test(colorCode))
     {
         return sendMsg(
             interaction, 
@@ -202,24 +217,6 @@ function canUseHex(interaction)
     let canHex = interaction.member.roles.cache.find(role => role.name.toLowerCase() === "hexable");
     if(canHex) return true;
     return false;
-}
-
-function getColorList(interaction)
-{
-    let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
-    let colorMeRoleEnd = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR')  && role.name.toUpperCase().includes('END'));
-    let colorList = [];
-
-    if(colorMeRole && colorMeRoleEnd)
-    {
-        colorList = interaction.guild.roles.cache
-            .filter(r => r.position < colorMeRole.position && r.position > colorMeRoleEnd.position && !r.name.includes('#'))
-            .map(r => r.name.toLowerCase());
-            
-        console.log(colorList);
-    }
-
-    return colorList;
 }
 
 async function handleSameColor(interaction, existingColorRole, colorCode) {
