@@ -17,75 +17,22 @@ module.exports = {
     ],
     deleted: false,
     callback: async (client, interaction) => {
-        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
+        let colorList = getColorList(interaction);
         const colorCode = interaction.options.getString('color-code').toUpperCase();
 
         if(isUsingHexable(interaction))
         {
-            colorMeName(interaction, colorCode)
+            colorMeName(interaction, colorCode, colorList);
         }
         else
         {
-            colorMeHex(interaction, colorCode)
+            colorMeHex(interaction, colorCode, colorList);
         }
-
-
-        // if(!role)
-        // {
-        //     console.log('Brand new role')
-        //     try
-        //     {
-        //         role = await interaction.guild.roles.create({
-        //             name: colorCode,
-        //             color: colorCode,
-        //             position: position,
-        //             reason: `Created role for color ${colorCode}` 
-        //         });
-
-        //         interaction.member.roles.add(role);
-
-        //         const msg = `Created and assigned role ${colorCode}.`
-        //         sendMsg(
-        //             interaction, 
-        //             msg, 
-        //             '#00FF00');
-
-        //         handleExistingColor(interaction, existingColorRole);
-        //     }
-        //     catch (error)
-        //     {
-        //         console.log(error)
-        //     }
-        // }
-        // else
-        // {
-        //     interaction.member.roles.add(role);
-
-        //     if(existingColorRole)
-        //     {
-        //         if(existingColorRole.name === colorCode)
-        //         {
-        //             handleSameColor(interaction, existingColorRole, colorCode);
-        //         }
-        //         else
-        //         {
-        //             const msg = `Assigned role ${colorCode}.`
-        //             sendMsg(
-        //                 interaction, 
-        //                 msg, 
-        //                 '#00FF00');
-
-        //             handleExistingColor(interaction, existingColorRole);
-        //         }
-        //     }
-            
-        // }
     }
 };
 
-function colorMeName(interaction, colorCode)
+function colorMeName(interaction, colorCode, colorList)
 {
-    let colorList = getColorList(interaction);
     const colorListToString = colorList.join(', ');
     if(!colorCode.includes('#'))
     {
@@ -111,11 +58,11 @@ function colorMeName(interaction, colorCode)
     }
     else
     {
-
+        colorMeHex(interaction, colorCode, colorList);
     }
 }
 
-function colorMeHex(interaction, colorCode)
+function colorMeHex(interaction, colorCode, colorList)
 {    
     if(!hexColorRegex.test(colorCode))
     {
@@ -126,13 +73,13 @@ function colorMeHex(interaction, colorCode)
     }
     else
     {
-
+        setColorHex(interaction, colorCode, colorList);
     }
 }
 
 async function setColor(interaction, colorCode, colorList)
 {
-    let existingColorRole = interaction.member.roles.cache.find(r => colorList.includes(r.name.toLowerCase()));
+    let existingColorRole = interaction.member.roles.cache.find(r => r.name.includes('#') || colorList.includes(r.name.toLowerCase()));
     let role = interaction.guild.roles.cache.find(r => r.name.toLowerCase() == colorCode.toLowerCase());
     try 
     {
@@ -152,13 +99,22 @@ async function setColor(interaction, colorCode, colorList)
             if(existingColorRole)
             {
                 await interaction.member.roles.remove(existingColorRole, 'Replaced with new color');
+
+                const msg = `Assigned role ${colorCode.toLowerCase()}, and removed ${existingColorRole.name}`
+                sendMsg(
+                    interaction, 
+                    msg, 
+                    '#FF9900');
+            }
+            else
+            {
+                const msg = `Assigned role ${colorCode.toLowerCase()}.`
+                sendMsg(
+                    interaction, 
+                    msg, 
+                    '#00FF00');
             }
 
-            const msg = `Assigned role ${colorCode.toLowerCase()}.`
-            sendMsg(
-                interaction, 
-                msg, 
-                '#00FF00');
         }
     }
     catch (error)
@@ -167,9 +123,71 @@ async function setColor(interaction, colorCode, colorList)
     }
 }
 
-async function setColorHex(interaction, colorCode)
+async function setColorHex(interaction, colorCode, colorList)
 {
+    let existingColorRole = interaction.member.roles.cache.find(r => r.name.includes('#') || colorList.includes(r.name.toLowerCase()));
+    let role = interaction.guild.roles.cache.find(r => r.name.toUpperCase() == colorCode.toUpperCase());
 
+    if(role)
+    {
+        interaction.member.roles.add(role);
+
+        if(existingColorRole)
+        {
+            if(existingColorRole.name === colorCode)
+            {
+                handleSameColor(interaction, existingColorRole, colorCode);
+            }
+            else
+            {
+                const msg = `Assigned role ${colorCode}, and removed ${existingColorRole.name}.`
+                sendMsg(
+                    interaction, 
+                    msg, 
+                    '#FF9900');
+
+                handleExistingColor(interaction, existingColorRole);
+            }
+        }
+        else
+        {
+            const msg = `Assigned role ${colorCode}`
+            sendMsg(
+                interaction, 
+                msg, 
+                '#00FF00');
+        }
+    }
+    else
+    {
+        console.log('Brand new role');
+        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
+        let position = colorMeRole ? colorMeRole.position : interaction.guild.roles.size;
+
+        try
+        {
+            let role = await interaction.guild.roles.create({
+                name: colorCode.toUpperCase(),
+                color: colorCode,
+                position: position,
+                reason: `Created role for color ${colorCode.toUpperCase()}` 
+            });
+
+            interaction.member.roles.add(role);
+
+            const msg = `Created and assigned role ${colorCode.toUpperCase()}.`
+            sendMsg(
+                interaction, 
+                msg, 
+                '#00FF00');
+
+            if(existingColorRole) handleExistingColor(interaction, existingColorRole);
+        }
+        catch (error)
+        {
+            console.log(error)
+        }
+    }
 }
 
 function isUsingHexable(interaction)
@@ -205,7 +223,7 @@ function getColorList(interaction)
 }
 
 async function handleSameColor(interaction, existingColorRole, colorCode) {
-    if(existingColorRole) 
+    if(existingColorRole.name.includes('#')) 
     {
         if(existingColorRole.name === colorCode)
         {
@@ -233,11 +251,10 @@ async function handleSameColor(interaction, existingColorRole, colorCode) {
         }
 
     }
-    return false;
 }
 
 async function handleExistingColor(interaction, existingColorRole) {
-    if (existingColorRole)
+    if (existingColorRole.name.includes('#'))
     {
         try 
         {
@@ -253,5 +270,9 @@ async function handleExistingColor(interaction, existingColorRole) {
         {
             console.log(error);
         }
+    }
+    else
+    {
+        await interaction.member.roles.remove(existingColorRole, 'Replaced with new color')
     }
 }
