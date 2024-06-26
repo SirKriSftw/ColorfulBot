@@ -11,23 +11,28 @@ module.exports = {
         {
             let colorList = await getColorList(client, interaction.guild.id)
 
-            if(colorList.client === 0)
+            if(colorList.length === 0)
             {
-                sendMsg
+                await sendMsg
                 (
                     interaction,
                     'There are no colors on this server currently.',
                     '#FF0000',
                     10
                 );
+                return;
             }
 
             let msg = 'Colors:'
             colorList.forEach(color => {
-                msg += `\n- ${color}`;
+                const role = interaction.guild.roles.cache.find(role => role.name === color);
+                if(role) msg += `\n <@&${role.id}>`;
+                else msg += `\n ${color}`;
+                
             });
 
-            await sendMsg(
+            sendMsg
+            (
                 interaction,
                 msg,
                 '#FFFFFF',
