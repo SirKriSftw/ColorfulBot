@@ -5,6 +5,9 @@ const getColorList = require('../../utils/getColorList');
 // Regular expression for hex color code validation
 const hexColorRegex = /^#([0-9A-F]{6})$/i;
 
+const cooldowns = new Map();
+const cooldownTimeSeconds = 10;
+
 module.exports = {
     name: 'colorme',
     description: 'Set user name color',
@@ -18,6 +21,9 @@ module.exports = {
     ],
     deleted: false,
     callback: async (client, interaction) => {
+        if(await checkCooldown(interaction)) return;
+        console.log('past return');
+
         let colorList = await getColorList(client, interaction.guild.id);
         const colorCode = interaction.options.getString('color-code').toUpperCase();
 
@@ -31,6 +37,54 @@ module.exports = {
         }
     }
 };
+
+async function checkCooldown(interaction)
+{
+    try
+    {
+        if(!cooldowns.has(interaction.user.id))
+        {
+            cooldowns.set(interaction.user.id, new Date());
+            return false;
+        }
+        else
+        {
+            const lastTime = cooldowns.get(interaction.user.id);
+            const now = new Date();
+            const diffTime = Math.abs(now - lastTime);
+            const seconds = Math.ceil(diffTime / 1000);
+    
+            if(seconds <= cooldownTimeSeconds)
+            {
+                const remainingTime = cooldownTimeSeconds - seconds;
+                await sendMsg
+                (
+                    interaction,
+                    `Please wait ${remainingTime} more second(s) before using colorme command again`,
+                    '#FF0000',
+                    10
+                )
+                return true;
+            }
+
+            cooldowns.set(interaction.user.id, now);
+            return false;
+        }
+    }
+    catch (error)
+    {
+        console.log(error);
+        await sendMsg
+        (
+            interaction,
+            'Error: Failed to run colorme command. Try again later.',
+            '#FF0000',
+            10
+        );
+
+        return;
+    }
+}
 
 function colorMeName(interaction, colorCode, colorList)
 {
