@@ -17,9 +17,41 @@ module.exports = {
     ],
     deleted: false,
     callback: async (client, interaction) => {
+        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
+        let colorList = [];
         const colorCode = interaction.options.getString('color-code').toUpperCase();
 
-        if (!hexColorRegex.test(colorCode))
+        if(isUsingHexable())
+        {
+            colorMeName()
+        }
+        else
+        {
+            colorMeHex()
+        }
+
+        if(!colorCode.includes('#'))
+        {
+            colorList = getColorList(interaction);
+            if(!colorList.includes(colorCode.toLowerCase()))
+            {
+                const colorListToString = colorList.join(', ')
+                return sendMsg(
+                    interaction, 
+                    `Error: Please use one of the following: ${colorListToString}`,
+                    '#FF0000');
+            }
+        }
+        else if(!canUseHex(interaction))
+        {
+            colorList = getColorList(interaction);
+            const colorListToString = colorList.join(', ')
+            return sendMsg(
+                interaction, 
+                `Error: You cannot use hex values use one of the following: ${colorListToString}`,
+                '#FF0000');
+        }
+        else if(!hexColorRegex.test(colorCode) && canHex(interaction))
         {
             return sendMsg(
                 interaction, 
@@ -30,7 +62,6 @@ module.exports = {
         let role = interaction.guild.roles.cache.find(role => role.name.toUpperCase() === colorCode);
         let existingColorRole = interaction.member.roles.cache.find(r => r.name.startsWith('#'));
 
-        let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
         let position = colorMeRole ? colorMeRole.position : interaction.guild.roles.size;
         
         if(!role)
@@ -66,7 +97,6 @@ module.exports = {
 
             if(existingColorRole)
             {
-                console.log(existingColorRole.color + " " + colorCode)
                 if(existingColorRole.name === colorCode)
                 {
                     handleSameColor(interaction, existingColorRole, colorCode);
@@ -86,6 +116,44 @@ module.exports = {
         }
     }
 };
+
+function colorMeName()
+{}
+
+function colorMeHex()
+{}
+
+function isUsingHexable(interaction)
+{
+    let hexable = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('hexable'));
+    if(hexable) return true;
+    return false;
+}
+
+function canUseHex(interaction)
+{
+    let canHex = interaction.member.roles.cache.find(role => role.name.toLowerCase() === "hexable");
+    if(canHex) return true;
+    return false;
+}
+
+function getColorList(interaction)
+{
+    let colorMeRole = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR') && role.name.toUpperCase() != "COLORFULBOT");
+    let colorMeRoleEnd = interaction.guild.roles.cache.find(role => role.name.toUpperCase().includes('COLOR')  && role.name.toUpperCase().includes('END'));
+    let colorList = [];
+
+    if(colorMeRole && colorMeRoleEnd)
+    {
+        colorList = interaction.guild.roles.cache
+            .filter(r => r.position < colorMeRole.position && r.position > colorMeRoleEnd.position && !r.name.includes('#'))
+            .map(r => r.name.toLowerCase());
+            
+        console.log(colorList);
+    }
+
+    return colorList;
+}
 
 async function handleSameColor(interaction, existingColorRole, colorCode) {
     if(existingColorRole) 
@@ -118,7 +186,6 @@ async function handleSameColor(interaction, existingColorRole, colorCode) {
     }
     return false;
 }
-
 
 async function handleExistingColor(interaction, existingColorRole) {
     if (existingColorRole)
