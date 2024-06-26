@@ -18,7 +18,7 @@ module.exports = {
     ],
     deleted: false,
     callback: async (client, interaction) => {
-        let colorList = await getColorList(client, interaction);
+        let colorList = await getColorList(client, interaction.guild.id);
         const colorCode = interaction.options.getString('color-code').toUpperCase();
 
         if(isUsingHexable(interaction))
