@@ -22,7 +22,6 @@ module.exports = {
     deleted: false,
     callback: async (client, interaction) => {
         if(await checkCooldown(interaction)) return;
-        console.log('past return');
 
         let colorList = await getColorList(client, interaction.guild.id);
         const colorCode = interaction.options.getString('color-code').toUpperCase();
