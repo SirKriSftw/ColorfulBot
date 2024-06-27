@@ -9,8 +9,6 @@ module.exports = async (client, guildId) => {
         roleList = guild.roles.cache
             .filter(r => r.position < roleStart.position && r.position > roleEnd.position)
             .map(r => r.name.toLowerCase());
-            
-        console.log(roleList);
     }
     return roleList;    
 }

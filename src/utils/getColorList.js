@@ -9,8 +9,6 @@ module.exports = async (client, guildId) => {
         colorList = guild.roles.cache
             .filter(r => r.position < colorMeRole.position && r.position > colorMeRoleEnd.position && !r.name.includes('#'))
             .map(r => r.name.toLowerCase());
-            
-        console.log(colorList);
     }
     return colorList;    
 }
