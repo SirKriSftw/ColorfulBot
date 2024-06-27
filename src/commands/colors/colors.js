@@ -25,7 +25,7 @@ module.exports = {
 
             let msg = 'Colors:'
             colorList.forEach(color => {
-                const role = interaction.guild.roles.cache.find(role => role.name === color);
+                const role = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === color.toLowerCase());
                 if(role) msg += `\n <@&${role.id}>`;
                 else msg += `\n ${color}`;
                 
