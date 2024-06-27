@@ -43,11 +43,11 @@ Then at the bottom of this you should see a GeneratedURL, copy it and paste it i
 
 ### 2. Give it brains
 Download this repo, ensure you have [nodejs]([nodejs](https://nodejs.org/en/download/package-manager)) installed.
-Add a file named ".env" into the main file and inside put `DISCORD_TOKEN = "<Bot token>"`, this token is what I told you to save earlier, if you lost it just go back to the bot page and press reset token.
-In the same folder add a "config.json" file, you can leave it blank. Or set a testServer (the server you want to test stuff on), the clientId (the bot's id) and devs (your id). But this is only if you want to add/change the bot and do some testing of your own.
+Add a file named `.env` into the main file and inside put `DISCORD_TOKEN = "<Bot token>"`, this token is what I told you to save earlier, if you lost it just go back to the bot page and press reset token.
+In the same folder add a `config.json` file, you can leave it blank. Or set a testServer (the server you want to test stuff on), the clientId (the bot's id) and devs (your id). But this is only if you want to add/change the bot and do some testing of your own.
 
 ### 3. Make it run
-Once files are setup and nodejs is installed just run 'node src/index.js' and it should run. Test it on your server by running the `/help` command.
+Once files are setup and nodejs is installed just run `node src/index.js` and it should run. Test it on your server by running the `/help` command.
 To be clear the bot ONLY works while the program is running. So if you want it running ALL the time you will need to host it yourself.
 Enjoy :D
 
