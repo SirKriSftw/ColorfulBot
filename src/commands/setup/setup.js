@@ -27,12 +27,13 @@ module.exports = {
         {
             name: 'permissions',
             description: 'Do users need permission to run cmd?',
-            type: ApplicationCommandOptionType.Boolean,
+            type: ApplicationCommandOptionType.String,
             choices: 
             [
                 {
                     name: 'true',
                     value: 'true'
+
                 },
                 {
                     name: 'false',
@@ -42,9 +43,10 @@ module.exports = {
         }
     ],
     deleted: false,
-    callback: async (client, interaction) => {
-        const rolesToSetup = interaction.options.get('setup').value;
-        const hasPermissions = interaction.options.get('permissions');
+    callback: async (client, interaction) => 
+    {
+        const rolesToSetup = interaction.options.get('setup')?.value;
+        const hasPermissions = interaction.options.get('permissions')?.value === 'true';
         
         if(!rolesToSetup) return;
         if(rolesToSetup === 'colors')
@@ -78,8 +80,9 @@ async function setupColors(interaction, permissions)
                 position: 0,
                 reason: `Created role for allowing users to change to a hex color.` 
             });
-            msg += `Added <@&${hexable.id}>. You can CANNOT edit the name. Give it to users who are allowed to use and create hex colors.\n`;
+            msg += `Added <@&${hexable.id}>. You can CANNOT edit the name, however you can move it wherever in role hierarchy for server. Give it to users who are allowed to use and create hex colors.\n`;
         }
+
         if(!colorMeRole)
         {
             colorMeRole = await guild.roles.create({
@@ -89,6 +92,7 @@ async function setupColors(interaction, permissions)
             });
             msg += `Added <@&${colorMeRole.id}>. You can edit the name, it just must include the word \'color\' in it.\n`;
         }
+
         if(!colorMeRoleEnd)
         {
             colorMeRoleEnd = await guild.roles.create({
@@ -98,15 +102,11 @@ async function setupColors(interaction, permissions)
             });
             msg += `Added <@&${colorMeRoleEnd.id}>. You can edit the name, it just must include the words \'color\' and \'end\' in it.\n`;
         }
+
         if(firstTime)
         {
             let red = guild.roles.cache.find(role => role.name.toLowerCase() === 'red');
-            if(red)
-            {
-                red.position = colorMeRole.position;
-                msg += `Moved existing <@&${red.id}> role into the color list. Here is where you place all colors you want a user to be able to use.\n`;
-            } 
-            else
+            if(!red)
             {
                 red = await guild.roles.create({
                     name: "red",
@@ -173,7 +173,7 @@ async function setupRoles(interaction, permissions)
                 position: 0,
                 reason: `Created role for allowing users to add roles.` 
             });
-            msg += `Added <@&${roleAble.id}>. You can CANNOT edit the name. Give it to users who are allowed to give themselves roles from role list.\n`;
+            msg += `Added <@&${roleAble.id}>. You can CANNOT edit the name, however you can move it wherever in role hierarchy for server. Give it to users who are allowed to give themselves roles from role list.\n`;
         }
         if(!roleStart)
         {
@@ -196,12 +196,7 @@ async function setupRoles(interaction, permissions)
         if(firstTime)
         {
             let sample = guild.roles.cache.find(role => role.name.toLowerCase() === 'sample');
-            if(sample)
-            {
-                sample.position = roleStart.position;
-                msg += `Moved existing <@&${sample.id}> role into the role list. Here is where you place all roles you want a user to be able to use.\n`;
-            } 
-            else
+            if(!sample)
             {
                 sample = await guild.roles.create({
                     name: "sample",
