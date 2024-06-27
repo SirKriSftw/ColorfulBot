@@ -49,16 +49,11 @@ module.exports = {
         if(!rolesToSetup) return;
         if(rolesToSetup === 'colors')
         {
-            setupColors(interaction, hasPermissions)
+            setupColors(interaction, hasPermissions);
         }
         else
         {
-            sendMsg(
-                interaction,
-                'Setting up roles',
-                '#00FF00',
-                -1
-            )
+            setupRoles(interaction, hasPermissions);
         }
     }
 };
@@ -139,6 +134,100 @@ async function setupColors(interaction, permissions)
             (
                 interaction,
                 'Roles for colors already setup',
+                '#FF0000',
+                -1
+            )
+        }
+    }
+    catch (error)
+    {
+        console.log(error);
+        sendMsg
+        (
+            interaction,
+            'There was an error running the command. Try again later.',
+            '#FF0000',
+            10
+        )
+    }
+
+}
+
+async function setupRoles(interaction, permissions)
+{
+    try 
+    {
+        const guild = interaction.guild;
+        let roleStart = guild.roles.cache.find(role => role.name.toUpperCase().includes('ROLE'));
+        let roleEnd = guild.roles.cache.find(role => role.name.toUpperCase().includes('ROLE')  && role.name.toUpperCase().includes('END'));
+        let roleAble = guild.roles.cache.find(role => role.name.toLowerCase().includes('role-able'));
+
+        let msg = ``;
+        let firstTime = false;
+
+        if(!roleStart && !roleEnd) firstTime = true;
+        if(permissions && !roleAble)
+        {
+            roleAble = await guild.roles.create({
+                name: "role-able",
+                position: 0,
+                reason: `Created role for allowing users to add roles.` 
+            });
+            msg += `Added <@&${roleAble.id}>. You can CANNOT edit the name. Give it to users who are allowed to give themselves roles from role list.\n`;
+        }
+        if(!roleStart)
+        {
+            roleStart = await guild.roles.create({
+                name: "===ROLES===",
+                position: 0,
+                reason: `Created role for organizing roles` 
+            });
+            msg += `Added <@&${roleStart.id}>. You can edit the name, it just must include the word \'roles\' in it.\n`;
+        }
+        if(!roleEnd)
+        {
+            roleEnd = await guild.roles.create({
+                name: "===ROLES END===",
+                position: 0,
+                reason: `Created role for organizing colors` 
+            });
+            msg += `Added <@&${roleEnd.id}>. You can edit the name, it just must include the words \'roles\' and \'end\' in it.\n`;
+        }
+        if(firstTime)
+        {
+            let sample = guild.roles.cache.find(role => role.name.toLowerCase() === 'sample');
+            if(sample)
+            {
+                sample.position = roleStart.position;
+                msg += `Moved existing <@&${sample.id}> role into the role list. Here is where you place all roles you want a user to be able to use.\n`;
+            } 
+            else
+            {
+                sample = await guild.roles.create({
+                    name: "sample",
+                    position: roleStart.position,
+                    reason: `Sample role` 
+                });
+                msg += `Added sample <@&${sample.id}> role into the role list. Here is where you place all roles you want a user to be able to use.\n`;
+            }
+        }
+
+        if(msg != "")
+        {
+            sendMsg
+            (
+                interaction,
+                msg,
+                '#FFFFFF',
+                -1
+            )
+        }
+        else
+        {
+            sendMsg
+            (
+                interaction,
+                'Roles for roleme already setup',
                 '#FF0000',
                 -1
             )

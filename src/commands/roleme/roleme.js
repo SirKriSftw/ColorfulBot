@@ -1,5 +1,6 @@
 const { ApplicationCommandOptionType } = require("discord.js");
 const sendMsg = require("../../utils/sendMsg");
+const getRoleList = require("../../utils/getRoleList");
 
 module.exports = {
     name: 'roleme',
@@ -24,5 +25,7 @@ module.exports = {
             '#00FF00',
             10
         )
+
+        let roleList = getRoleList(client, interaction.guild.id);
     }
 }
