@@ -166,7 +166,7 @@ async function setColor(interaction, colorCode, colorList)
             interaction.member.roles.add(role);
             if(existingColorRole)
             {
-                await interaction.member.roles.remove(existingColorRole, 'Replaced with new color');
+                handleExistingColor(interaction, existingColorRole);
 
                 const msg = `Assigned role ${colorCode.toLowerCase()}, and removed ${existingColorRole.name}`
                 sendMsg(
