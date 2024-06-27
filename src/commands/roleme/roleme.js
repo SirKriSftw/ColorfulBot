@@ -24,10 +24,11 @@ module.exports = {
         if(roleList.includes(roleName)) setRole(interaction, roleName);
         else
         {
+            const roleListToString = roleList.join(', ');
             sendMsg
             (
                 interaction,
-                `${roleName[0].toUpperCase() + roleName.slice(1)} is not a valid role.\nMust be one of the following: ${roleList}`,
+                `${roleName[0].toUpperCase() + roleName.slice(1)} is not a valid role.\nMust be one of the following: ${roleListToString}`,
                 '#FF0000',
                 10
             )
