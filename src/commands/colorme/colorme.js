@@ -260,7 +260,7 @@ async function setColorHex(interaction, colorCode, colorList)
 
 function isUsingHexable(interaction)
 {
-    let hexable = interaction.guild.roles.cache.find(role => role.name.toLowerCase().includes('hexable'));
+    let hexable = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === 'hexable');
     if(hexable) return true;
     return false;
 }
